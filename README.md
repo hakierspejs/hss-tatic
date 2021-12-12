@@ -18,5 +18,3 @@ resized image from imageproxy https://hssi.hs-ldz.pl/480x,r180,q30/http://server
 
 In the local environment, Nginx serve files on http://127.0.0.1:42380/, and imageproxy is available under http://127.0.0.1:42388 URI
 
-The project folder on the  server is `/var/ss-tatic`, to share image place it in the `/var/ss-tatic/data` directory.
-
