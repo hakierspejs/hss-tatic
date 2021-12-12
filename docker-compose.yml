@@ -1,0 +1,51 @@
+version: '3.3'
+
+services:
+  server:
+    image: nginx:latest
+    privileged: false
+    volumes:
+      - ./data:/usr/share/nginx/html
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template
+    expose:
+      - 80
+    ports:
+      - "127.0.0.1:42380:80"
+    environment:
+     - NGINX_HOST=localhost
+     - NGINX_PORT=80
+    restart: unless-stopped
+    labels:
+      traefik.http.routers.hssn.rule: "Host(`hssn.hs-ldz.pl`)"
+      traefik.http.routers.hssn.entrypoints: "web"
+      traefik.http.routers.hssn.middlewares: "hssn-https-redirect@docker"
+      traefik.http.routers.hssn-https.rule: "Host(`hssn.hs-ldz.pl`)"
+      traefik.http.routers.hssn-https.entrypoints: "websecure"
+      traefik.http.routers.hssn-https.tls.certresolver: "myresolver"
+      traefik.http.services.hssn.loadbalancer.server.port: 80
+      traefik.http.middlewares.hssn-https-redirect.redirectscheme.scheme: "https"
+      traefik.http.middlewares.hssn-https-redirect.redirectscheme.permanent: "true"
+    networks:
+      default:
+
+  proxy:
+    image: ghcr.io/willnorris/imageproxy
+    privileged: false
+    command: "-verbose -cache /app/cache -addr 0.0.0.0:8080 -userAgent 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0'"
+    expose:
+      - 8080
+    ports:
+      - "127.0.0.1:42388:8080"
+    restart: unless-stopped
+    labels:
+      traefik.http.routers.hssi.rule: "Host(`hssi.hs-ldz.pl`)"
+      traefik.http.routers.hssi.entrypoints: "web"
+      traefik.http.routers.hssi.middlewares: "hssi-https-redirect@docker"
+      traefik.http.routers.hssi-https.rule: "Host(`hssi.hs-ldz.pl`)"
+      traefik.http.routers.hssi-https.entrypoints: "websecure"
+      traefik.http.routers.hssi-https.tls.certresolver: "myresolver"
+      traefik.http.services.hssi.loadbalancer.server.port: 8080
+      traefik.http.middlewares.hssi-https-redirect.redirectscheme.scheme: "https"
+      traefik.http.middlewares.hssi-https-redirect.redirectscheme.permanent: "true"
+    networks:
+      default:
